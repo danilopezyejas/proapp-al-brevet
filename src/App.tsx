@@ -867,17 +867,21 @@ export default function PreguntadosApp() {
 
   // Efecto para el temporizador
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-
+    let timer: ReturnType<typeof setTimeout>;
+  
     if (timerActive && !showAnswer && !gameFinished && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
+      timer = setTimeout(() => {
+        setTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (timeLeft === 0 && !showAnswer) {
       handleTimeOut();
     }
-
-    return () => clearInterval(timer);
+  
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [timeLeft, showAnswer, gameFinished, timerActive]);
 
   const handleTimeOut = () => {
