@@ -844,7 +844,7 @@ export default function PreguntadosApp() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [timerActive, setTimerActive] = useState(true);
 
-  const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffleArray = <T extends unknown>(array: T[]): T[] => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
