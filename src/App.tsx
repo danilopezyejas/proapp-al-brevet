@@ -165,7 +165,7 @@ const allQuestions = [
       'Reducir la cadena',
       'No hacer nada',
     ],
-    answer: 'Aumentar cadena a 5 veces el fondo',
+    answer: 'Aumentar cadena a 5 veces el fondo y controlar el garreo',
   },
   {
     question: '¿Qué norma debe seguirse para estudiar una derrota?',
@@ -451,7 +451,7 @@ const allQuestions = [
       'Apartarse y evitar riesgo de colisión',
       'Pasar por babor',
     ],
-    answer: 'Apartarse',
+    answer: 'Apartarse y evitar riesgo de colisión',
   },
   {
     question: '¿Qué se debe hacer al entrar a puerto?',
@@ -491,7 +491,7 @@ const allQuestions = [
       'Pasar por babor',
       'Salir del canal',
     ],
-    answer: 'Arrimarse a estribor',
+    answer: 'Arrimarse a estribor (para facilitar el paso seguro en canales angostos)',
   },
   {
     question: '¿Qué significa una pitada corta?',
