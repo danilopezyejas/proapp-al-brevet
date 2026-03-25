@@ -1,838 +1,212 @@
-import { useState, useEffect } from 'react';
-import { Button } from './components/ui/button';
-import { Card, CardContent } from './components/ui/card';
+import { useState, useEffect, useCallback } from "react";
+import type { CSSProperties } from "react";
 
-const allQuestions = [
-  // Pregunta 1-10 ya incluidas anteriormente
-  {
-    question: '¿Cuál es la luz reglamentaria de tope?',
-    options: ['Luz roja', 'Luz verde', 'Luz blanca', 'Luz azul'],
-    answer: 'Luz blanca',
-  },
-  {
-    question: '¿Qué significa una pitada corta?',
-    options: [
-      'Caigo a estribor',
-      'Caigo a babor',
-      'Estoy dando atrás',
-      'Estoy fondeado',
-    ],
-    answer: 'Caigo a estribor',
-  },
-  {
-    question: '¿Qué luz debe llevar una embarcación en la banda de estribor?',
-    options: ['Luz blanca', 'Luz verde', 'Luz roja', 'Luz amarilla'],
-    answer: 'Luz verde',
-  },
-  {
-    question:
-      '¿Qué señal se realiza si no se entiende la intención de otro buque?',
-    options: [
-      'Una pitada larga',
-      'Tres pitadas cortas',
-      'Cinco pitadas cortas y rápidas',
-      'Una pitada corta seguida de una larga',
-    ],
-    answer: 'Cinco pitadas cortas y rápidas',
-  },
-  {
-    question: '¿Qué boya se debe dejar a estribor al entrar a un canal?',
-    options: ['Verde', 'Roja', 'Amarilla', 'Negra con franjas rojas'],
-    answer: 'Roja',
-  },
-  {
-    question: '¿Qué debe hacer un buque de motor al encontrarse con un velero?',
-    options: [
-      'Nada, tiene prioridad',
-      'Pasar por babor del velero',
-      'Apartarse del velero',
-      'Emitir dos pitadas cortas',
-    ],
-    answer: 'Apartarse del velero',
-  },
-  {
-    question:
-      '¿Qué hacer si se duda sobre si hay una situación de vuelta encontrada?',
-    options: [
-      'Esperar y observar',
-      'Pedir indicaciones por radio',
-      'Proceder como si fuera vuelta encontrada',
-      'Emitir una pitada larga',
-    ],
-    answer: 'Proceder como si fuera vuelta encontrada',
-  },
-  {
-    question: '¿Qué indica una boya blanca con ritmo Morse A?',
-    options: [
-      'Aguas seguras',
-      'Casco a pique',
-      'Zona de fondeo',
-      'Aguas peligrosas',
-    ],
-    answer: 'Aguas seguras',
-  },
-  {
-    question: '¿Cuál es la presión atmosférica media a nivel del mar?',
-    options: ['1013 hPa', '760 mm', '1000 mm', '980 mb'],
-    answer: '760 mm',
-  },
-  {
-    question: '¿Qué tipo de extintor debe usarse en un incendio eléctrico?',
-    options: ['Agua', 'Espuma', 'CO2', 'Polvo químico seco'],
-    answer: 'CO2',
-  },
-  // Pregunta 11
-  {
-    question: '¿Qué luces debe llevar una embarcación en la banda de babor?',
-    options: ['Luz blanca', 'Luz verde', 'Luz roja', 'Luz azul'],
-    answer: 'Luz roja',
-  },
-  {
-    question: '¿Qué arco de horizonte visible debe tener la luz de tope?',
-    options: ['180°', '225°', '112,5°', '360°'],
-    answer: '225°',
-  },
-  {
-    question: '¿Qué luces debe mostrar un velero de noche?',
-    options: [
-      'Luz blanca a popa',
-      'Luces de banda',
-      'Luz tricolor en el tope (opcional si <20m)',
-      'Luz roja intermitente',
-    ],
-    answer: 'Luces de banda',
-  },
-  {
-    question: '¿Qué significa barlovento?',
-    options: [
-      'Donde hay más olas',
-      'Zona más profunda',
-      'Banda de donde viene el viento',
-      'Contrario a la corriente',
-    ],
-    answer: 'Banda de donde viene el viento',
-  },
-  {
-    question: '¿Qué hacer cuando un buque tiene dudas si alcanza a otro?',
-    options: [
-      'Continuar sin cambios',
-      'Considerarse alcanzado',
-      'Considerarse como alcanzante',
-      'Hacer señales acústicas',
-    ],
-    answer: 'Considerarse como alcanzante',
-  },
-  {
-    question: '¿Qué luces indica un buque sin gobierno sin arrancada?',
-    options: [
-      '2 luces rojas todo horizonte en línea vertical',
-      '2 luces verdes',
-      '1 luz blanca',
-      '3 luces blancas',
-    ],
-    answer: '2 luces rojas todo horizonte en línea vertical',
-  },
-  {
-    question: '¿Qué indica una boya blanca con dos destellos?',
-    options: [
-      'Zona de fondeo',
-      'Casco a pique',
-      'Aguas profundas',
-      'Zona peligrosa',
-    ],
-    answer: 'Casco a pique',
-  },
-  {
-    question: '¿Cuántos metros tiene una milla náutica?',
-    options: ['1000 m', '1852 m', '1500 m', '2000 m'],
-    answer: '1852 m',
-  },
-  {
-    question: '¿Qué elementos se necesitan para un incendio?',
-    options: [
-      'Agua, fuego y aire',
-      'Fósforo, chispa y madera',
-      'Combustible, aire y calor',
-      'Fuego, humo y calor',
-    ],
-    answer: 'Combustible, aire y calor',
-  },
-  {
-    question: '¿Qué se debe hacer si hay mal tiempo y estás fondeado?',
-    options: [
-      'Levantar el ancla',
-      'Aumentar cadena a 5 veces el fondo y controlar el garreo',
-      'Reducir la cadena',
-      'No hacer nada',
-    ],
-    answer: 'Aumentar cadena a 5 veces el fondo y controlar el garreo',
-  },
-  {
-    question: '¿Qué norma debe seguirse para estudiar una derrota?',
-    options: [
-      'Evitar boyas',
-      'No seguir rutas en carta',
-      'Evitar peligros en carta',
-      'Tomar rumbo libremente',
-    ],
-    answer: 'Evitar peligros en carta',
-  },
-  {
-    question:
-      '¿Qué viento suele soplar en la madrugada en verano en el Río de la Plata?',
-    options: ['Este', 'Norte', 'Sur', 'Oeste'],
-    answer: 'Norte',
-  },
-  {
-    question: '¿Cuál es la clase de incendio de líquidos inflamables?',
-    options: ['A', 'B', 'C', 'D'],
-    answer: 'B',
-  },
-  {
-    question: '¿Qué extintor usar para combustibles sólidos?',
-    options: ['Espuma', 'CO2', 'Polvo químico', 'Agua'],
-    answer: 'Agua',
-  },
-  {
-    question: '¿Dónde se despacha una embarcación deportiva?',
-    options: [
-      'Ministerio de Turismo',
-      'Club Náutico',
-      'Prefectura Nacional Naval',
-      'Municipio',
-    ],
-    answer: 'Prefectura Nacional Naval',
-  },
-  {
-    question: '¿Qué documento se requiere para despacho?',
-    options: [
-      'Pasaporte',
-      'Título de propiedad',
-      'Certificado de navegabilidad',
-      'Factura de compra',
-    ],
-    answer: 'Certificado de navegabilidad',
-  },
-  {
-    question: '¿Zona autorizada para la categoría B?',
-    options: [
-      '15 millas desde Montevideo',
-      'Río de la Plata y 15 millas desde Punta del Este a La Paloma',
-      'Mar territorial hasta 100 millas',
-      'Solo ríos internos',
-    ],
-    answer: 'Río de la Plata y 15 millas desde Punta del Este a La Paloma',
-  },
-  {
-    question: '¿Qué hacer si un buque garrea?',
-    options: [
-      'Levantar ancla',
-      'Aumentar cadena',
-      'Emitir señales',
-      'Cambiar rumbo',
-    ],
-    answer: 'Aumentar cadena',
-  },
-  {
-    question:
-      '¿Qué fenómeno meteorológico indica un descenso rápido de presión?',
-    options: ['Buen tiempo', 'Niebla', 'Lluvia ligera', 'Viento fuerte'],
-    answer: 'Viento fuerte',
-  },
-  {
-    question: '¿Qué nube indica mal tiempo inminente?',
-    options: ['Stratus', 'Cirrus', 'Cumulus-nimbus', 'Altocumulus'],
-    answer: 'Cumulus-nimbus',
-  },
-  {
-    question:
-      '¿Qué instrumento se usa para reflejar el sol en señales de auxilio?',
-    options: ['Teléfono', 'Linterna', 'Espejo', 'Cacerola'],
-    answer: 'Espejo',
-  },
-  {
-    question: '¿Qué se hace con las tiras de tela naranja a bordo?',
-    options: [
-      'Cubrir velas',
-      'Tapar ventanas',
-      'Formar una cruz',
-      'Pedir ayuda',
-    ],
-    answer: 'Formar una cruz',
-  },
-  {
-    question: '¿Qué significa garrear?',
-    options: [
-      'Remolcar a otro buque',
-      'Moverse sin control',
-      'Arrastrar el ancla sin sujetarse',
-      'Perder propulsión',
-    ],
-    answer: 'Arrastrar el ancla sin sujetarse',
-  },
-  {
-    question: '¿Qué se usa para detectar si una embarcación garrea?',
-    options: ['Compás', 'GPS', 'Marcaciones y cadena', 'Velocidad del viento'],
-    answer: 'Marcaciones y cadena',
-  },
-  {
-    question: '¿Qué viento anuncia la llegada de un frente frío en verano?',
-    options: ['Norte', 'Este', 'Sur', 'Oeste'],
-    answer: 'Sur',
-  },
-  {
-    question: '¿Qué luces debe llevar un buque remolcado?',
-    options: [
-      'Luz blanca todo horizonte a popa (si <50m)',
-      'Luces de banda y coronamiento',
-      'Luces rojas',
-      'Luces verdes',
-    ],
-    answer: 'Luces de banda y coronamiento',
-  },
-  {
-    question: '¿Qué extintor se recomienda para líquidos inflamables?',
-    options: ['Agua', 'Espuma mecánica', 'CO2', 'Arena'],
-    answer: 'Espuma mecánica',
-  },
-  {
-    question:
-      '¿Qué luz se debe exhibir al fondear de noche (menos de 45,75 m)?',
-    options: [
-      'Luz roja a popa',
-      'Dos luces blancas',
-      'Luz blanca todo horizonte proa',
-      'Luz azul todo horizonte',
-    ],
-    answer: 'Luz blanca todo horizonte proa',
-  },
-  {
-    question: '¿Qué luz debe llevar un buque varado de noche?',
-    options: [
-      'Una blanca y una roja',
-      'Tres rojas',
-      'Una blanca proa + dos rojas en línea vertical',
-      'Solo luz blanca en proa',
-    ],
-    answer: 'Una blanca proa + dos rojas en línea vertical',
-  },
-  {
-    question: '¿Qué señal diurna debe llevar un buque varado?',
-    options: [
-      'Un balón negro',
-      'Tres balones negros',
-      'Dos conos negros',
-      'Una esfera y un cono',
-    ],
-    answer: 'Tres balones negros',
-  },
-  {
-    question: '¿Qué luz se debe mostrar en la banda de estribor?',
-    options: ['Roja', 'Blanca', 'Verde', 'Azul'],
-    answer: 'Verde',
-  },
-  {
-    question: '¿Qué indica una boya con franjas verticales rojas y blancas?',
-    options: [
-      'Zona peligrosa',
-      'Aguas seguras',
-      'Casco a pique',
-      'Zona de exclusión',
-    ],
-    answer: 'Aguas seguras',
-  },
-  {
-    question: '¿Qué indica una boya con conos negros vértices arriba?',
-    options: ['Sur', 'Este', 'Norte', 'Oeste'],
-    answer: 'Norte',
-  },
-  {
-    question: '¿Qué se entiende por pitada larga?',
-    options: ['1 segundo', '2 segundos', 'Entre 4 y 6 segundos', '10 segundos'],
-    answer: 'Entre 4 y 6 segundos',
-  },
-  {
-    question: '¿Qué tipo de incendio es el eléctrico?',
-    options: ['A', 'B', 'C', 'D'],
-    answer: 'C',
-  },
-  {
-    question: '¿Qué tipo de extintor se usa en incendios clase C?',
-    options: ['Agua', 'Espuma', 'CO2', 'Tierra'],
-    answer: 'CO2',
-  },
-  {
-    question:
-      '¿Qué debe hacer un buque que no entiende las intenciones del otro?',
-    options: [
-      '1 pitada larga',
-      '3 pitadas cortas',
-      '5 pitadas cortas y rápidas',
-      '2 pitadas largas',
-    ],
-    answer: '5 pitadas cortas y rápidas',
-  },
-  {
-    question: '¿Qué luces lleva un pesquero de arrastre de noche?',
-    options: [
-      '2 luces blancas',
-      'Verde sobre blanca (todo horizonte, en línea vertical)',
-      'Roja sobre blanca',
-      'Blanca sobre verde',
-    ],
-    answer: 'Verde sobre blanca (todo horizonte, en línea vertical)',
-  },
-  {
-    question: '¿Qué señal diurna lleva un pesquero de arrastre >20m?',
-    options: [
-      'Un balón negro',
-      'Dos conos negros unidos por sus puntas en línea vertical',
-      'Canasto de pesca',
-      'Un cono y una esfera',
-    ],
-    answer: 'Dos conos negros unidos por sus puntas en línea vertical',
-  },
-  {
-    question: '¿Qué luces debe llevar un buque sin gobierno?',
-    options: [
-      '2 luces rojas en línea vertical todo horizonte en el lugar más visible',
-      'Una verde',
-      'Una blanca',
-      'Roja y blanca',
-    ],
-    answer:
-      '2 luces rojas en línea vertical todo horizonte en el lugar más visible',
-  },
-  {
-    question: '¿Qué significa sotavento?',
-    options: [
-      'Donde viene el viento',
-      'Zona alta',
-      'Banda opuesta al viento',
-      'Zona con olas',
-    ],
-    answer: 'Banda opuesta al viento',
-  },
-  {
-    question: '¿Qué luz lleva un buque de vela y motor (día)?',
-    options: [
-      'Cónica vértice abajo',
-      'Balón negro',
-      'Bandera roja',
-      'Dos conos',
-    ],
-    answer: 'Cónica vértice abajo',
-  },
-  {
-    question: '¿Qué significa tres pitadas cortas?',
-    options: [
-      'Caigo a babor',
-      'Caigo a estribor',
-      'Estoy dando atrás',
-      'Parado',
-    ],
-    answer: 'Estoy dando atrás',
-  },
-  {
-    question: '¿Qué hacer al cruzarse dos buques con riesgo de colisión?',
-    options: [
-      'Ambos maniobran',
-      'El que tiene al otro por estribor cede',
-      'El más grande tiene prioridad',
-      'Esperar señal acústica',
-    ],
-    answer: 'El que tiene al otro por estribor cede',
-  },
-  {
-    question: '¿Qué debe hacer el buque que alcanza a otro?',
-    options: [
-      'Seguir igual',
-      'Pedir permiso',
-      'Apartarse y evitar riesgo de colisión',
-      'Pasar por babor',
-    ],
-    answer: 'Apartarse y evitar riesgo de colisión',
-  },
-  {
-    question: '¿Qué se debe hacer al entrar a puerto?',
-    options: [
-      'Aumentar velocidad',
-      'Dar pitadas',
-      'Verificar entrada libre y navegar con velocidad de seguridad',
-      'Usar luces blancas',
-    ],
-    answer: 'Verificar entrada libre y navegar con velocidad de seguridad',
-  },
-  {
-    question: '¿Qué instrumento indica presión atmosférica?',
-    options: ['Anemómetro', 'Higrómetro', 'Barómetro', 'Termómetro'],
-    answer: 'Barómetro',
-  },
-  {
-    question: '¿Qué indica presión <760 mm?',
-    options: [
-      'Buen tiempo',
-      'Cambio sensible en condiciones',
-      'Aumento de temperatura',
-      'Mar en calma',
-    ],
-    answer: 'Cambio sensible en condiciones',
-  },
-  {
-    question: '¿Qué tipo de nubes pueden producir tornados?',
-    options: ['Cumulus', 'Stratus', 'Cumulus-nimbus', 'Cirrus'],
-    answer: 'Cumulus-nimbus',
-  },
-  {
-    question: '¿Qué hacer si el canal es angosto?',
-    options: [
-      'Fondear en el medio',
-      'Arrimarse a estribor (para facilitar el paso seguro en canales angostos)',
-      'Pasar por babor',
-      'Salir del canal',
-    ],
-    answer: 'Arrimarse a estribor (para facilitar el paso seguro en canales angostos)',
-  },
-  {
-    question: '¿Qué significa una pitada corta?',
-    options: [
-      'Estoy fondeado',
-      'Caigo a estribor',
-      'Cambio de rumbo a babor',
-      'Estoy detenido',
-    ],
-    answer: 'Caigo a estribor',
-  },
-  {
-    question: '¿Qué indica una boya blanca con grupo de dos destellos?',
-    options: [
-      'Casco a pique',
-      'Zona de fondeo',
-      'Aguas profundas',
-      'Obstáculo sumergido',
-    ],
-    answer: 'Casco a pique',
-  },
-  {
-    question: '¿Qué debe hacer un buque navegando en visibilidad reducida?',
-    options: [
-      'Aumentar velocidad',
-      'Parar máquinas',
-      'Reducir velocidad y emitir señales',
-      'Navegar en zigzag',
-    ],
-    answer: 'Reducir velocidad y emitir señales',
-  },
-  {
-    question:
-      '¿Qué tipo de viento predomina en el Río de la Plata por la tarde en verano?',
-    options: ['Norte', 'Oeste', 'Este-sureste', 'Sur'],
-    answer: 'Este-sureste',
-  },
-  {
-    question:
-      '¿Qué señal sónica realiza un buque fondeado en visibilidad reducida?',
-    options: [
-      'Una pitada cada minuto',
-      'Campana 5 seg cada minuto',
-      'Tres pitadas cortas',
-      'Una larga y una corta',
-    ],
-    answer: 'Campana 5 seg cada minuto',
-  },
-  {
-    question: '¿Qué extintor no debe usarse en materiales eléctricos?',
-    options: ['CO2', 'Espuma', 'Polvo químico', 'Agente limpio'],
-    answer: 'Espuma',
-  },
-  {
-    question: '¿Qué buques tienen prioridad sobre uno a motor?',
-    options: [
-      'Buque sin gobierno, pesca, vela, maniobra limitada',
-      'Solo pesqueros',
-      'Solo veleros',
-      'Ninguno',
-    ],
-    answer: 'Buque sin gobierno, pesca, vela, maniobra limitada',
-  },
-  {
-    question: '¿Qué luz tiene alcance de 225° desde proa?',
-    options: ['Babor', 'Estribor', 'Tope', 'Fondeo'],
-    answer: 'Tope',
-  },
-  {
-    question:
-      '¿Qué tipo de luz lleva una embarcación de menos de 7m fuera de canales?',
-    options: [
-      'Todas las reglamentarias',
-      'Luz blanca opcional',
-      'Ninguna obligatoria',
-      'Luz verde intermitente',
-    ],
-    answer: 'Ninguna obligatoria',
-  },
-  {
-    question: '¿Qué distancia debe tener la cadena al fondear?',
-    options: ['2x fondo', '3x fondo', '5x fondo', '10x fondo'],
-    answer: '3x fondo',
-  },
-  {
-    question: '¿Qué hacer si se quiere adelantar en canal angosto?',
-    options: [
-      'Emitir dos pitadas largas y una corta o dos cortas',
-      'Pedir permiso por radio',
-      'Hacer señales luminosas',
-      'No se puede adelantar',
-    ],
-    answer: 'Emitir dos pitadas largas y una corta o dos cortas',
-  },
-  {
-    question: '¿Qué indica una señal bicónica durante el día?',
-    options: [
-      'Buque fondeado',
-      'Buque sin gobierno',
-      'Buque remolcando >183m',
-      'Pesquero',
-    ],
-    answer: 'Buque remolcando >183m',
-  },
-  {
-    question: '¿Cuántas luces blancas lleva un remolcador de >183m?',
-    options: ['1', '2', '3', '4'],
-    answer: '3',
-  },
-  {
-    question: '¿Qué se considera un destello?',
-    options: ['0.5 seg', '1 seg', '2 seg', '5 seg'],
-    answer: '1 seg',
-  },
-  {
-    question: '¿Qué intervalo hay entre destellos?',
-    options: ['0.5 seg', '1 seg', '2 seg', '5 seg'],
-    answer: '1 seg',
-  },
-  {
-    question: '¿Cuál debe ser el intervalo entre señales sucesivas?',
-    options: ['5 seg', '10 seg mínimo', '15 seg', '20 seg'],
-    answer: '10 seg mínimo',
-  },
-  {
-    question: '¿Qué indica una boya negra con franjas rojas?',
-    options: [
-      'Aguas seguras',
-      'Casco a pique',
-      'Peligro al norte',
-      'Zona de fondeo',
-    ],
-    answer: 'Casco a pique',
-  },
-  {
-    question: '¿Qué marca de tope tiene una boya de aguas seguras?',
-    options: [
-      'Dos conos negros',
-      'Una esfera roja',
-      'Un cono y esfera',
-      'Cruz negra',
-    ],
-    answer: 'Una esfera roja',
-  },
-  {
-    question: '¿Qué señal acústica da un buque sin gobierno en niebla?',
-    options: [
-      'Una larga cada 2 min',
-      'Una larga + dos cortas cada 2 min',
-      'Tres cortas',
-      'Campana continua',
-    ],
-    answer: 'Una larga + dos cortas cada 2 min',
-  },
-  {
-    question: '¿Qué luces usa un pesquero no de arrastre?',
-    options: [
-      'Roja sobre verde',
-      'Verde sobre blanca (todo horizonte, en línea vertical)',
-      'Roja sobre blanca',
-      'Dos blancas',
-    ],
-    answer: 'Roja sobre blanca',
-  },
-  {
-    question: '¿Qué luz indica un buque de menos de 12m remolcado?',
-    options: [
-      'Luz de tope',
-      'Luz verde',
-      'Luz blanca todo horizonte a popa',
-      'Luz roja',
-    ],
-    answer: 'Luz blanca todo horizonte a popa',
-  },
-  {
-    question: '¿Cuántas pitadas indica que voy a babor?',
-    options: ['1', '2', '3', '5'],
-    answer: '2',
-  },
-  {
-    question: '¿Qué luz indica el fondeo durante el día?',
-    options: ['Ninguna', 'Luz verde', 'Balón negro', 'Cruz roja'],
-    answer: 'Balón negro',
-  },
-  {
-    question: '¿Qué señal diurna lleva un buque sin gobierno?',
-    options: [
-      'Bandera amarilla',
-      'Cruz roja',
-      'Dos balones negros',
-      'Una esfera negra',
-    ],
-    answer: 'Dos balones negros',
-  },
-  {
-    question: '¿Qué significa una luz blanca todo horizonte?',
-    options: ['Fondeado', 'Varado', 'En movimiento', 'Emergencia'],
-    answer: 'Fondeado',
-  },
-  {
-    question: '¿Qué se usa para reconocer un fondeadero?',
-    options: [
-      'Corriente intensa',
-      'Fondo rocoso',
-      'Buen tenedero y abrigo',
-      'Altura de olas',
-    ],
-    answer: 'Buen tenedero y abrigo',
-  },
-  {
-    question: '¿Qué nubes anuncian vientos fuertes?',
-    options: ['Cirros', 'Stratus', 'Cumulus-nimbus', 'Altostratus'],
-    answer: 'Cumulus-nimbus',
-  },
-  {
-    question: '¿Cuál es la señal acústica universal de peligro?',
-    options: [
-      'Una larga',
-      'Dos cortas',
-      'Cinco cortas y rápidas',
-      'Tres largas',
-    ],
-    answer: 'Cinco cortas y rápidas',
-  },
-  {
-    question: '¿Qué debe mostrar un velero y motor navegando de día?',
-    options: [
-      'Un cono vértice abajo',
-      'Una esfera roja',
-      'Dos conos',
-      'Ninguna señal',
-    ],
-    answer: 'Un cono vértice abajo',
-  },
-  {
-    question: '¿Qué embarcaciones no deben entorpecer buques en canales?',
-    options: [
-      'Mayores a 20m',
-      'Veleros y menores a 20m',
-      'Remolcadores',
-      'Todas las embarcaciones',
-    ],
-    answer: 'Veleros y menores a 20m',
-  },
-  {
-    question: '¿Qué tipo de boya indica aguas más profundas al norte?',
-    options: [
-      'Negro sobre amarillo con conos hacia arriba',
-      'Rojo sólido',
-      'Amarilla con esfera',
-      'Blanco intermitente',
-    ],
-    answer: 'Negro sobre amarillo con conos hacia arriba',
-  },
-  {
-    question: '¿Qué significa zona C?',
-    options: [
-      'Aguas abiertas',
-      '15 millas del puerto de despacho',
-      'Frontera marítima',
-      'Zona exclusiva',
-    ],
-    answer: '15 millas del puerto de despacho',
-  },
-  {
-    question: '¿Cuál es el tipo de extintor universal?',
-    options: ['CO2', 'Espuma', 'Polvo químico seco', 'Agua'],
-    answer: 'Polvo químico seco',
-  },
-  {
-    question: '¿Qué extintor no conduce electricidad?',
-    options: ['Agua', 'CO2', 'Espuma', 'Tierra'],
-    answer: 'CO2',
-  },
-  {
-    question:
-      '¿Cuál es la mejor forma de entrar sin arrancada a un fondeadero?',
-    options: [
-      'Proando al viento o corriente',
-      'Popa al viento',
-      'Lado a la corriente',
-      'Velocidad constante',
-    ],
-    answer: 'Proando al viento o corriente',
-  },
-  {
-    question: '¿Qué se debe hacer en visibilidad reducida?',
-    options: [
-      'Apagar luces',
-      'Emitir señales y reducir velocidad',
-      'Aumentar velocidad',
-      'Navegar sin luces',
-    ],
-    answer: 'Emitir señales y reducir velocidad',
-  },
-  {
-    question: '¿Qué elemento se usa para medir presión?',
-    options: ['Termómetro', 'Barómetro', 'Anemómetro', 'Veleta'],
-    answer: 'Barómetro',
-  },
-  {
-    question: '¿Cuál es la forma de indicar socorro desde el aire?',
-    options: [
-      'Tirar bengalas',
-      'Cruz con tela naranja',
-      'Bandera negra',
-      'Reflejo con espejo',
-    ],
-    answer: 'Cruz con tela naranja',
-  },
-  {
-    question: '¿Qué se hace al detectar que se garrea?',
-    options: [
-      'Esperar',
-      'Aumentar cadena y verificar marcaciones',
-      'Levantar ancla de inmediato',
-      'Cambiar dirección',
-    ],
-    answer: 'Aumentar cadena y verificar marcaciones',
-  },
-  {
-    question: '¿Cuál es el número de salvavidas obligatorio?',
-    options: [
-      'Uno por pasajero',
-      'Uno por cada dos personas',
-      'Cinco por embarcación',
-      'Solo para tripulación',
-    ],
-    answer: 'Uno por pasajero',
-  },
-];
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Question {
+type Category =
+  | "luces"
+  | "senales_diurnas"
+  | "senales_sonoras"
+  | "senales_luminosas"
+  | "maniobras"
+  | "vela"
+  | "visibilidad_reducida"
+  | "balizamiento"
+  | "fondeo"
+  | "planificacion_navegacion"
+  | "maniobras_puerto"
+  | "meteorologia"
+  | "incendios"
+  | "despacho"
+  | "angulos"
+  | "medidas";
+
+interface BaseQuestion {
+  id: number;
+  category: Category;
   question: string;
-  options: string[];
   answer: string;
+}
+
+interface Question extends BaseQuestion {
+  options: string[];
 }
 
 interface ShuffledQuestion extends Question {
   shuffledOptions: string[];
 }
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+// FIX 1: Explicit BaseQuestion[] type so `category` is narrowed to Category,
+//         not widened to string.
+
+export const baseQuestions: BaseQuestion[] = [
+  { id: 1, category: "luces", question: "¿Cuál es la luz reglamentaria de tope?", answer: "La luz blanca." },
+  { id: 2, category: "luces", question: "¿Qué luz debe llevar una embarcación en la banda de estribor?", answer: "Una luz verde." },
+  { id: 3, category: "luces", question: "¿Qué luz debe llevar una embarcación en la banda de babor?", answer: "Una luz roja." },
+  { id: 4, category: "angulos", question: "¿Qué arco de horizonte visible debe tener la luz de tope?", answer: "225° repartidos desde la proa, 112° 5' a cada banda." },
+  { id: 5, category: "angulos", question: "¿Qué arco de horizonte visible deben tener las luces de banda?", answer: "112° 5' desde la proa." },
+  { id: 6, category: "luces", question: "¿Qué alcance lumínico deben tener la luz de tope en buques de?", answer: "50 o más metros de eslora: 6 millas; entre 20 y 50 metros de eslora: 5 millas; entre 12 y 20 metros de eslora: 3 millas; menos de 12 metros de eslora: 2 millas." },
+  { id: 7, category: "luces", question: "¿Qué alcance lumínico deben tener las luces de banda de un buque de?", answer: "50 o más metros de eslora: 5 millas; entre 12 y 50 metros de eslora: 3 millas; menos de 12 metros de eslora: 1 milla." },
+  { id: 8, category: "luces", question: "¿Qué luces adicionales deberá llevar un buque que realice tareas de remolque, siendo la longitud de éste menor a 183 mts.?", answer: "Dos luces blancas verticales." },
+  { id: 9, category: "luces", question: "¿Qué luces adicionales deberá llevar un buque que realiza tareas de remolque, siendo la longitud de éste superior a 183 mts.?", answer: "3 luces blancas verticales." },
+  { id: 10, category: "angulos", question: "¿Qué arco de horizonte deben tener las luces que indican buque en tarea de remolque?", answer: "Iguales a las luces de tope, 225°." },
+  { id: 11, category: "senales_diurnas", question: "¿Qué señal exhibirá todo buque en tarea de remolque siendo éste superior a 183 mts., en horas del día?", answer: "Una señal bicónica." },
+  { id: 12, category: "luces", question: "¿Qué luces exhibirá todo buque remolcado durante la noche?", answer: "Luces de banda y de coronamiento." },
+  { id: 13, category: "luces", question: "¿Qué luces debe exhibir durante la noche una embarcación navegando a vela?", answer: "Luces de banda." },
+  { id: 14, category: "senales_diurnas", question: "¿Qué señal exhibirá un buque que navegue a vela y también mecánicamente durante el día?", answer: "Una señal cónica con el vértice hacia abajo." },
+  { id: 15, category: "luces", question: "¿Qué luces adicionales exhibirán durante la noche los buques pesqueros dedicados a la pesca de arrastre?", answer: "Dos luces en línea vertical todo horizonte, verde la superior y blanca la inferior." },
+  { id: 16, category: "senales_diurnas", question: "¿Qué señal deberá mostrar un pesquero de arrastre de 20 o más metros de eslora durante el día?", answer: "Dos conos negros unidos por sus puntas en línea vertical." },
+  { id: 17, category: "senales_diurnas", question: "¿Qué señal deberá tener izada un pesquero de arrastre de menos de 20 metros de eslora durante el día?", answer: "Dos conos negros unidos por sus puntas o un canasto de pesca." },
+  { id: 18, category: "luces", question: "¿Qué luces exhibirán además de la reglamentaria, los buques pesqueros que no sean de arrastre?", answer: "2 luces todo horizonte en línea vertical, roja la superior y blanca la inferior." },
+  { id: 19, category: "luces", question: "¿Qué luces deberá exhibir un buque sin gobierno que no tenga arrancada?", answer: "2 luces rojas visibles en todo el horizonte en línea vertical en el lugar más visible." },
+  { id: 20, category: "senales_diurnas", question: "¿Qué señal deberá exhibir todo buque sin gobierno en horas del día?", answer: "2 balones negros." },
+  { id: 21, category: "senales_diurnas", question: "¿Qué señal deberá tener izada durante el día toda embarcación que se encuentre fondeada?", answer: "Un balón negro." },
+  { id: 22, category: "luces", question: "¿Qué luz deberá tener durante la noche todo buque fondeado de menos de 45,75 mts. de eslora?", answer: "Una luz blanca todo horizonte en proa en el lugar más visible." },
+  { id: 23, category: "senales_diurnas", question: "¿Qué señal deberá exhibir todo buque varado durante el día?", answer: "Tres balones negros en línea vertical." },
+  { id: 24, category: "luces", question: "¿Qué luces deberá mostrar todo buque de menos de 45,75 mts. de eslora varado durante la noche?", answer: "Una luz blanca a proa todo horizonte y dos luces rojas en línea vertical todo horizonte." },
+  { id: 25, category: "luces", question: "Las embarcaciones de menos de 7 mts. de eslora cuando están fondeadas o varadas fuera de la zona de navegación, paso o canales, ¿deberán llevar las luces o señales de un buque varado o fondeado?", answer: "No." },
+  { id: 26, category: "senales_sonoras", question: "¿Qué se entiende por pitada corta?", answer: "Un sonido de aproximadamente un segundo de duración." },
+  { id: 27, category: "senales_sonoras", question: "¿Qué se entiende por pitada larga?", answer: "Un sonido de aproximadamente 4 a 6 segundos de duración." },
+  { id: 28, category: "maniobras", question: "¿Qué significa una pitada corta?", answer: "Caigo a estribor." },
+  { id: 29, category: "maniobras", question: "¿Qué significan dos pitadas cortas?", answer: "Caigo a babor." },
+  { id: 30, category: "maniobras", question: "¿Qué significan tres pitadas cortas?", answer: "Estoy dando atrás." },
+  { id: 31, category: "senales_luminosas", question: "¿Cómo indica por medio de destellos que caerá a estribor?", answer: "Un destello." },
+  { id: 32, category: "senales_luminosas", question: "¿Cómo indica por medio de destellos que caerá a babor?", answer: "Dos destellos." },
+  { id: 33, category: "senales_luminosas", question: "¿Cómo indica por medio de destellos que está dando máquinas atrás?", answer: "Tres destellos." },
+  { id: 34, category: "senales_luminosas", question: "¿Cuál es la duración aproximada de un destello?", answer: "1 segundo." },
+  { id: 35, category: "senales_luminosas", question: "¿Cuál es el intervalo entre destello y destello?", answer: "1 segundo." },
+  { id: 36, category: "senales_luminosas", question: "¿Cuál es el intervalo entre señales sucesivas?", answer: "No menor de 10 segundos." },
+  { id: 37, category: "senales_sonoras", question: "Cuando dos embarcaciones se encuentran a la vista en un paso o canal angosto, ¿qué señales deberá realizar el buque que pretende alcanzar a otro?", answer: "Dos pitadas largas seguidas de una corta significa: pretendo alcanzarle por su banda de estribor. Dos pitadas largas seguidas de dos cortas significa: pretendo alcanzarle por su babor." },
+  { id: 38, category: "senales_sonoras", question: "¿Qué señal deberá realizar todo buque que no entiende las intenciones del otro?", answer: "5 pitadas cortas y rápidas." },
+  { id: 39, category: "visibilidad_reducida", question: "¿Qué señal deberá realizar un buque navegando en zonas de visibilidad reducida?", answer: "Una pitada larga cada dos minutos." },
+  { id: 40, category: "visibilidad_reducida", question: "¿Qué señal sónica deberán realizar los buques sin gobierno, pesqueros, veleros con capacidad de maniobra reducida o todo buque remolcado cuando navega en zonas de visibilidad reducida?", answer: "1 pitada larga seguida de dos cortas con un intervalo de 2 minutos." },
+  { id: 41, category: "visibilidad_reducida", question: "¿Qué señal sónica deberá realizar todo buque fondeado en zona de visibilidad reducida?", answer: "Repiques de campana con una duración de 5 segundos con un intervalo de más de un minuto." },
+  { id: 42, category: "maniobras", question: "¿Qué es la velocidad de seguridad?", answer: "Es la que permite efectuar la maniobra adecuada y eficaz para evitar un abordaje." },
+  { id: 43, category: "maniobras", question: "¿Qué elementos se deberán tener en cuenta para determinar la velocidad de seguridad?", answer: "Visibilidad; densidad del tráfico; maniobrabilidad del buque; estado del mar, viento y corriente; calado con relación a la profundidad." },
+  { id: 44, category: "maniobras", question: "¿Cómo determina que existe riesgo de colisión cuando dos buques navegan en rumbos encontrados?", answer: "Si la demora al buque que se aproxima es constante o sin variación apreciable." },
+  { id: 45, category: "maniobras", question: "¿Cómo debe ser realizada una buena maniobra para evitar un abordaje?", answer: "Debe ser realizada de tal forma que los buques pasen en distancia segura." },
+  { id: 46, category: "maniobras", question: "Si navegando por un canal se encuentran dos embarcaciones con rumbos encontrados, ¿qué maniobra deberán realizar?", answer: "Se arrimarán lo más posible al límite exterior del canal que quede por su banda de estribor." },
+  { id: 47, category: "maniobras", question: "Cuando un buque de fuerza motriz y un velero estén avanzando en direcciones que involucren riesgo de colisión, en aguas libres, ¿quién deberá mantenerse apartado de la ruta del otro?", answer: "El buque de fuerza motriz." },
+  { id: 48, category: "maniobras", question: "¿Puede un buque cruzar un paso o canal, si al hacerlo interfiere el tránsito de otro buque?", answer: "No." },
+  { id: 49, category: "maniobras", question: "¿Pueden las embarcaciones de eslora inferior a los 20 mts o los veleros entorpecer el tránsito seguro de buques de propulsión mecánica que naveguen en canales?", answer: "No." },
+  { id: 50, category: "vela", question: "Cuando dos veleros se aproximan uno al otro y reciben el viento por bandas contrarias, ¿cuál de ellos debe mantenerse apartado de la derrota del otro?", answer: "El que reciba el viento por babor." },
+  { id: 51, category: "maniobras", question: "¿Puede una embarcación fondear en un canal angosto?", answer: "No; deberá, si es posible, salir del canal para no estorbar la navegación." },
+  { id: 52, category: "vela", question: "Cuando dos veleros que naveguen con rumbos cruzados y pudiera existir riesgo de abordaje, y ambos reciban el viento por la misma banda, ¿cuál de ellos se mantendrá apartado de la derrota del otro?", answer: "El buque que esté a barlovento se mantendrá apartado del que esté a sotavento." },
+  { id: 53, category: "vela", question: "¿Qué significa barlovento?", answer: "Banda de donde viene el viento." },
+  { id: 54, category: "vela", question: "¿Qué significa sotavento?", answer: "Banda opuesta a la que viene el viento." },
+  { id: 55, category: "maniobras", question: "¿Qué se considera por buque que alcanza?", answer: "A todo buque que se aproxima a otro viniendo desde una marcación mayor de 22° 5' a popa del través del buque alcanzado, de tal forma que de noche solo sea visible la luz de coronamiento y ninguna de sus luces de costado." },
+  { id: 56, category: "maniobras", question: "Entre un buque que alcanza y el alcanzado, ¿cuál de los dos tiene que mantenerse apartado de la derrota del otro?", answer: "El buque que alcanza." },
+  { id: 57, category: "maniobras", question: "Cuando un buque tenga dudas de si es alcanzante o no, ¿cómo se considerará?", answer: "Como buque que alcanza." },
+  { id: 58, category: "maniobras", question: "Cuando dos buques naveguen de vuelta encontrada, a rumbos opuestos o casi opuestos con riesgo de colisión, ¿qué maniobra deberán realizar?", answer: "Cada uno de ellos deberá caer a estribor." },
+  { id: 59, category: "maniobras", question: "¿Cómo determina en horas de la noche cuando dos buques vienen de vuelta encontrada?", answer: "Cuando se ven por la proa las dos luces de banda y la luz de tope." },
+  { id: 60, category: "maniobras", question: "¿Cómo determina en horas del día que dos buques están en situación de vuelta encontrada?", answer: "Cuando por la proa se ven enfilados los palos del otro buque." },
+  { id: 61, category: "maniobras", question: "¿Qué deberá hacer si tiene dudas de que existe una situación de vuelta encontrada?", answer: "Procederá como si fuera una situación de vuelta encontrada." },
+  { id: 62, category: "maniobras", question: "Cuando dos buques se crucen con riesgo de colisión, ¿cuál de los dos deberá mantenerse apartado de la derrota del otro?", answer: "El buque que tenga el otro por su banda de estribor deberá gobernar para mantenerse apartado de la derrota del otro." },
+  { id: 63, category: "maniobras", question: "¿De qué buques se mantendrán apartadas las embarcaciones en navegación libre con propulsión mecánica?", answer: "De un buque sin gobierno; de un buque con capacidad de maniobra limitada; de un buque dedicado a la pesca; de un buque a vela." },
+  { id: 64, category: "visibilidad_reducida", question: "¿Qué precauciones deberá tomar toda embarcación que se encuentre navegando en una zona de visibilidad reducida?", answer: "Reducir la velocidad a la de seguridad y realizar las señales correspondientes." },
+  { id: 65, category: "balizamiento", question: "¿Qué indica una boya de luz blanca con grupo de dos destellos, y cómo están pintadas para su reconocimiento diurno?", answer: "Indica casco a pique y está pintada de color negro con una o más franjas rojas, siendo su marca de tope dos esferas negras superpuestas." },
+  { id: 66, category: "balizamiento", question: "¿Qué indica una boya de luz blanca con un ritmo isofásico, de ocultación o Morse \"A\", y cómo están pintadas para su reconocimiento diurno?", answer: "Indican aguas seguras y están pintadas con franjas verticales blancas y rojas, con una esfera roja como marca de tope." },
+  { id: 67, category: "balizamiento", question: "¿Qué indica una boya de luz blanca con un ritmo Q o VQ, y cómo están pintadas para su reconocimiento diurno?", answer: "Indican que las aguas más profundas en la zona se encuentran en el cuadrante Norte tomando como centro la boya, y están pintadas de negro sobre amarillo con dos conos negros superpuestos con las puntas hacia arriba." },
+  { id: 68, category: "balizamiento", question: "¿Qué boya se debe dejar a estribor al entrar en un canal de acceso a un puerto o al remontar un río balizado?", answer: "Las boyas rojas." },
+  { id: 69, category: "balizamiento", question: "¿Cómo pueden ser las boyas por sus características luminosas?", answer: "Destellos, ocultación, fijas, isofásicas y centelleantes." },
+  { id: 70, category: "balizamiento", question: "¿De dónde se pueden extraer las características de los faros?", answer: "De las cartas náuticas, los derroteros y las listas de faros." },
+  { id: 71, category: "planificacion_navegacion", question: "¿Qué normas deben seguirse para el estudio de una derrota?", answer: "Estudiar la derrota en la carta poniendo especial atención en que ésta no pase sobre peligros a la navegación." },
+  { id: 72, category: "maniobras_puerto", question: "¿Qué precauciones deberá tomar para realizar una entrada o salida a puerto?", answer: "Para salir de puerto, deberá observar si éste está abierto o cerrado; si tiene salida libre, hacerlo con velocidad de seguridad. Para entrar, si tiene entrada libre, hacerlo con velocidad de seguridad." },
+  { id: 73, category: "fondeo", question: "¿Qué es un fondeadero?", answer: "Es aquel que asegura una buena protección para los vientos predominantes y además su fondo es un buen tenedero." },
+  { id: 74, category: "fondeo", question: "¿Cuántas veces el fondo es conveniente fondear de cadena?", answer: "Por lo menos 3 veces el fondo determinado." },
+  { id: 75, category: "fondeo", question: "¿Cómo se debe tomar un fondeadero?", answer: "Se deberá aproar la embarcación a la corriente o al viento, llegando al punto elegido sin arrancada o con arrancada atrás, fondear el ancla y dar cadena a medida que vaya pidiendo." },
+  { id: 76, category: "fondeo", question: "¿Qué significa garrear?", answer: "Cuando una embarcación fondeada no se aguanta produciendo un arrastre del ancla por el fondo." },
+  { id: 77, category: "fondeo", question: "¿Cómo determina que una embarcación garrea?", answer: "Cuando las marcaciones a dos puntos notables en tierra por lo menos varían en forma apreciable; tocando la cadena se notan sacudones." },
+  { id: 78, category: "fondeo", question: "¿Cuando estando fondeado se levante mal tiempo, qué precauciones deberá tomar?", answer: "Cuidar que la embarcación no garree; para ello es aconsejable aumentar la cantidad de cadena fondeada hasta por lo menos cinco veces el fondo." },
+  { id: 79, category: "meteorologia", question: "¿Qué indica un descenso rápido en la presión atmosférica?", answer: "Un cambio en las condiciones del tiempo generalmente con aportes de vientos fuertes." },
+  { id: 80, category: "meteorologia", question: "¿Qué aspecto presentan los cumulus-nimbus?", answer: "Grandes masas nubosas que se alzan como montañas en el horizonte con tonalidades oscuras casi negras." },
+  { id: 81, category: "meteorologia", question: "¿Qué fenómenos meteorológicos acompañan la presencia de cumulus-nimbus?", answer: "Vientos fuertes, turbonados y en casos excepcionales tornados." },
+  { id: 82, category: "meteorologia", question: "¿Cuál es la presión atmosférica media a nivel del mar?", answer: "760 mm." },
+  { id: 83, category: "meteorologia", question: "En épocas de verano y en situaciones normales, ¿cuál es el régimen de rotación de los vientos en el Río de la Plata?", answer: "Durante la noche sopla del Norte, por la mañana rota por el Oeste y se coloca del Este-Sureste." },
+  { id: 84, category: "meteorologia", question: "¿Por debajo de qué valores la presión atmosférica puede indicar un cambio sensible en las condiciones meteorológicas?", answer: "Cuando la presión desciende por debajo de los 760 mm." },
+  { id: 85, category: "meteorologia", question: "La persistencia de un viento dirección norte, ¿qué trae generalmente aparejado?", answer: "La entrada de un frente frío con aporte de vientos fuertes del sector Sur." },
+  { id: 86, category: "incendios", question: "¿Cuáles son los tres elementos que determinan un incendio?", answer: "Combustible, aire y calor." },
+  { id: 87, category: "incendios", question: "¿Cuáles son las tres clases de incendios?", answer: "Clase A: combustibles sólidos. Clase B: combustibles líquidos. Clase C: materiales eléctricos." },
+  { id: 88, category: "incendios", question: "¿Qué tipo de extintor debe usarse preferentemente en un incendio de combustibles sólidos?", answer: "Chorro de agua." },
+  { id: 89, category: "incendios", question: "¿Qué tipo de extintor debe usarse preferentemente en un incendio de combustibles líquidos?", answer: "Espuma mecánica." },
+  { id: 90, category: "incendios", question: "¿Qué tipo de extintor debe usarse preferentemente en un incendio de materiales eléctricos?", answer: "Anhídrido carbónico (CO2)." },
+  { id: 91, category: "incendios", question: "¿Cuál es la primer medida a tomar al producirse un incendio de materiales eléctricos?", answer: "Desenergizar el sistema." },
+  { id: 92, category: "despacho", question: "¿Dónde se solicita el despacho de las embarcaciones deportivas?", answer: "Ante la repartición de la Prefectura Nacional Naval correspondiente al puerto donde se halla surta la embarcación; en caso de no existir dependencia, en la más próxima." },
+  { id: 93, category: "despacho", question: "¿Qué documentación se deberá exhibir para solicitar despacho?", answer: "Certificado de navegabilidad, de seguridad y brevet para patronear embarcaciones deportivas y documento de identidad." },
+  { id: 94, category: "despacho", question: "¿Dentro de qué zona está autorizada zona \"B\"?", answer: "En todo el Río de la Plata y una faja costera de 15 millas desde Punta del Este a La Paloma." },
+  { id: 95, category: "despacho", question: "¿Dentro de qué radio está autorizada a navegar una embarcación habilitada para hacerlo en la zona \"C\"?", answer: "Dentro de un radio de 15 millas del puerto de despacho." },
+  { id: 96, category: "medidas", question: "¿Cuántos metros tiene una milla marina?", answer: "Tiene 1.852 metros." },
+  { id: 97, category: "medidas", question: "¿Cuántos salvavidas deberá llevar una embarcación?", answer: "Tantos como número de tripulantes lleve." },
+  { id: 98, category: "medidas", question: "¿Cuál es la aplicación a dar a las tiras de tela color naranja que deben llevar las embarcaciones?", answer: "Colocarlas formando cruz sobre cubierta en caso de solicitar auxilio." },
+  { id: 99, category: "medidas", question: "¿Cuál es la aplicación a dar al espejo que deben llevar las embarcaciones?", answer: "Llamar la atención reflejando en éste los rayos solares." },
+  { id: 100, category: "medidas", question: "¿A cuánto equivale en metros una braza (Fathom)?", answer: "Equivale a 1.83 metros." },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
+
+const normalizeText = (text: string): string =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+
+const pickDistractors = (current: BaseQuestion, all: BaseQuestion[], count = 3): string[] => {
+  const sameCategory = [
+    ...new Set(
+      all
+        .filter(
+          (q) =>
+            q.id !== current.id &&
+            q.category === current.category &&
+            normalizeText(q.answer) !== normalizeText(current.answer)
+        )
+        .map((q) => q.answer)
+    ),
+  ];
+
+  if (sameCategory.length >= count) {
+    return shuffleArray(sameCategory).slice(0, count);
+  }
+
+  const fallback = [
+    ...new Set(
+      all
+        .filter(
+          (q) =>
+            q.id !== current.id &&
+            normalizeText(q.answer) !== normalizeText(current.answer) &&
+            !sameCategory.some((a) => normalizeText(a) === normalizeText(q.answer))
+        )
+        .map((q) => q.answer)
+    ),
+  ];
+
+  return [
+    ...sameCategory,
+    ...shuffleArray(fallback).slice(0, count - sameCategory.length),
+  ];
+};
+
+const buildQuestions = (base: BaseQuestion[]): Question[] =>
+  base.map((q) => ({
+    ...q,
+    options: shuffleArray([q.answer, ...pickDistractors(q, base, 3)]),
+  }));
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function PreguntadosApp() {
   const [questions, setQuestions] = useState<ShuffledQuestion[]>([]);
@@ -844,63 +218,46 @@ export default function PreguntadosApp() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [timerActive, setTimerActive] = useState(true);
 
-  const shuffleArray = <T extends unknown>(array: T[]): T[] => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
   const shuffleQuestions = () => {
-    const shuffledQuestions = shuffleArray(allQuestions).map((q) => ({
-      ...q,
-      shuffledOptions: shuffleArray(q.options),
-    }));
-    setQuestions(shuffledQuestions);
+    const built = buildQuestions(baseQuestions);
+    setQuestions(
+      shuffleArray(built).map((q) => ({
+        ...q,
+        shuffledOptions: shuffleArray(q.options),
+      }))
+    );
   };
 
   useEffect(() => {
     shuffleQuestions();
   }, []);
 
-  // Efecto para el temporizador
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-  
-    if (timerActive && !showAnswer && !gameFinished && timeLeft > 0) {
-      timer = setTimeout(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && !showAnswer) {
-      handleTimeOut();
-    }
-  
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [timeLeft, showAnswer, gameFinished, timerActive]);
-
-  const handleTimeOut = () => {
+  // FIX 4: handleTimeOut wrapped in useCallback so it's stable and can be
+  //         safely listed as a dependency of the timer useEffect.
+  const handleTimeOut = useCallback(() => {
     setTimerActive(false);
     setShowAnswer(true);
-    // Mostrar la respuesta correcta cuando se acaba el tiempo
     setSelected(null);
-  };
+  }, []);
 
+  // Timer — handleTimeOut is now a stable reference via useCallback.
+  useEffect(() => {
+    if (!timerActive || showAnswer || gameFinished || timeLeft <= 0) {
+      if (timeLeft === 0 && !showAnswer) handleTimeOut();
+      return;
+    }
+    const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [timeLeft, showAnswer, gameFinished, timerActive, handleTimeOut]);
+
+  // FIX 2: Explicit string type for `option` parameter.
   const handleAnswer = (option: string) => {
     if (showAnswer) return;
     setTimerActive(false);
     setSelected(option);
     setShowAnswer(true);
-
-    // Usamos currentQuestion en lugar de questions[current] para evitar problemas de sincronización
-    const currentQuestion = questions[current];
-    if (currentQuestion && option === currentQuestion.answer) {
-      setScore((prevScore) => prevScore + 1);
+    if (option === questions[current]?.answer) {
+      setScore((s) => s + 1);
     }
   };
 
@@ -920,38 +277,28 @@ export default function PreguntadosApp() {
     setShowAnswer(false);
     setTimeLeft(30);
     setTimerActive(true);
-
     if (current === questions.length - 1) {
       setGameFinished(true);
     } else {
-      setCurrent((prev) => prev + 1);
+      setCurrent((c) => c + 1);
     }
   };
 
   if (questions.length === 0) {
-    return <div className="text-gray-900">Cargando preguntas...</div>;
+    return <div style={{ padding: 16 }}>Cargando preguntas...</div>;
   }
 
   if (gameFinished) {
     return (
-      <div className="min-h-screen bg-gray-100 p-4">
-        <div className="max-w-xl mx-auto">
-          <Card>
-            <CardContent className="text-center">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900">
-                ¡Juego terminado!
-              </h2>
-              <p className="text-lg mb-4 text-gray-900">
-                Tu puntaje final: {score} de {questions.length}
-              </p>
-              <Button
-                onClick={resetGame}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
-              >
-                Jugar de nuevo
-              </Button>
-            </CardContent>
-          </Card>
+      <div style={styles.screen}>
+        <div style={styles.card}>
+          <h2 style={styles.title}>¡Juego terminado!</h2>
+          <p style={styles.body}>
+            Tu puntaje final: {score} de {questions.length}
+          </p>
+          <button style={styles.btnPrimary} onClick={resetGame}>
+            Jugar de nuevo
+          </button>
         </div>
       </div>
     );
@@ -960,110 +307,155 @@ export default function PreguntadosApp() {
   const currentQuestion = questions[current];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
+    <div style={styles.screen}>
+      <div style={styles.container}>
+        {/* Header */}
+        <div style={styles.header}>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Proapp al Brevet
-            </h1>
-            <p className="text-sm text-gray-700 italic">
+            <h1 style={styles.title}>Proapp al Brevet</h1>
+            <p style={styles.subtitle}>
               Tu compañero para aprobar el examen náutico PRENA
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={resetGame}
-            className="text-gray-900 border-gray-300"
-          >
+          <button style={styles.btnOutline} onClick={resetGame}>
             Reiniciar
-          </Button>
+          </button>
         </div>
 
-        <Card>
-          <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm font-medium text-gray-900">
-                Pregunta {current + 1} de {questions.length}
-              </span>
-              <span
-                className={`text-sm font-medium ${
-                  timeLeft <= 10 ? 'text-red-600' : 'text-gray-900'
-                }`}
-              >
-                Tiempo: {timeLeft}s
-              </span>
-            </div>
-            <p className="text-lg font-medium mb-4 text-gray-900">
-              {currentQuestion.question}
-            </p>
-            <div className="grid gap-2">
-              {currentQuestion.shuffledOptions.map((option, idx) => (
-                <Button
-                  key={idx}
-                  onClick={() => handleAnswer(option)}
-                  variant={
-                    showAnswer
-                      ? option === currentQuestion.answer
-                        ? 'default'
-                        : option === selected
-                        ? 'destructive'
-                        : 'outline'
-                      : 'outline'
-                  }
-                  disabled={showAnswer || timeLeft === 0}
-                  className={`
-                    ${
-                      showAnswer && option === currentQuestion.answer
-                        ? 'bg-green-500 hover:bg-green-500 text-white'
-                        : ''
-                    }
-                    ${
-                      showAnswer &&
-                      option === selected &&
-                      option !== currentQuestion.answer
-                        ? 'bg-red-500 hover:bg-red-500 text-white'
-                        : ''
-                    }
-                    ${!showAnswer ? 'text-gray-900 hover:bg-gray-200' : ''}
-                  `}
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
-            {showAnswer && (
-              <div className="mt-4">
-                <p className="text-gray-900">
-                  {selected === currentQuestion.answer
-                    ? '✅ ¡Correcto!'
-                    : selected
-                    ? `❌ Incorrecto. Respuesta correcta: ${currentQuestion.answer}`
-                    : `⏱️ Tiempo agotado! La respuesta correcta era: ${currentQuestion.answer}`}
-                </p>
-                <Button
-                  className="mt-2 bg-blue-500 hover:bg-blue-600 text-white"
-                  onClick={nextQuestion}
-                >
-                  Siguiente
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        <div className="mt-4 flex justify-between items-center">
-          <p className="text-sm text-gray-900">Puntaje: {score}</p>
-          <div className="flex items-center">
-            <span
-              className={`text-sm font-medium mr-2 ${
-                timeLeft <= 10 ? 'text-red-600' : 'text-gray-900'
-              }`}
-            >
-              Tiempo restante: {timeLeft}s
+        {/* Card */}
+        <div style={styles.card}>
+          {/* Progress & timer */}
+          <div style={styles.row}>
+            <span style={styles.small}>
+              Pregunta {current + 1} de {questions.length}
+            </span>
+            <span style={{ ...styles.small, color: timeLeft <= 10 ? "#dc2626" : "#111" }}>
+              Tiempo: {timeLeft}s
             </span>
           </div>
+
+          {/* Question */}
+          <p style={styles.question}>{currentQuestion.question}</p>
+
+          {/* Options */}
+          <div style={styles.optionsGrid}>
+            {currentQuestion.shuffledOptions.map((option, idx) => {
+              let bg = "#fff";
+              let color = "#111";
+              let border = "1px solid #d1d5db";
+
+              if (showAnswer) {
+                if (option === currentQuestion.answer) {
+                  bg = "#22c55e"; color = "#fff"; border = "1px solid #16a34a";
+                } else if (option === selected) {
+                  bg = "#ef4444"; color = "#fff"; border = "1px solid #dc2626";
+                } else {
+                  bg = "#f3f4f6"; color = "#6b7280";
+                }
+              }
+
+              return (
+                <button
+                  key={idx}
+                  style={{ ...styles.optionBtn, background: bg, color, border }}
+                  onClick={() => handleAnswer(option)}
+                  disabled={showAnswer || timeLeft === 0}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Feedback */}
+          {showAnswer && (
+            <div style={styles.feedback}>
+              <p style={{ marginBottom: 8 }}>
+                {selected === currentQuestion.answer
+                  ? "✅ ¡Correcto!"
+                  : selected
+                    ? `❌ Incorrecto. Respuesta correcta: ${currentQuestion.answer}`
+                    : `⏱️ Tiempo agotado! La respuesta correcta era: ${currentQuestion.answer}`}
+              </p>
+              <button style={styles.btnPrimary} onClick={nextQuestion}>
+                Siguiente
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Score */}
+        <div style={styles.row}>
+          <span style={styles.small}>Puntaje: {score}</span>
+          <span style={{ ...styles.small, color: timeLeft <= 10 ? "#dc2626" : "#111" }}>
+            Tiempo restante: {timeLeft}s
+          </span>
         </div>
       </div>
     </div>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+// FIX 3: Typed as Record<string, CSSProperties> so TypeScript validates every
+//         property (including textAlign: "left") against CSSProperties,
+//         preventing the "string not assignable" error on spread.
+const styles: Record<string, CSSProperties> = {
+  screen: {
+    minHeight: "100vh",
+    background: "#f3f4f6",
+    padding: 16,
+    fontFamily: "system-ui, sans-serif",
+  },
+  container: { maxWidth: 560, margin: "0 auto" },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  card: {
+    background: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: "0 1px 3px rgba(0,0,0,.1)",
+    marginBottom: 16,
+  },
+  title: { fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#111" },
+  subtitle: { fontSize: 13, color: "#6b7280", margin: 0, fontStyle: "italic" },
+  body: { fontSize: 16, marginBottom: 16, color: "#111" },
+  row: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  small: { fontSize: 13, fontWeight: 600, color: "#111" },
+  question: { fontSize: 16, fontWeight: 600, marginBottom: 16, color: "#111" },
+  optionsGrid: { display: "grid", gap: 8 },
+  optionBtn: {
+    width: "100%",
+    padding: "10px 14px",
+    borderRadius: 8,
+    cursor: "pointer",
+    textAlign: "left",   // ✅ valid because styles is typed as CSSProperties
+    fontSize: 14,
+    transition: "background .15s",
+  },
+  feedback: { marginTop: 16 },
+  btnPrimary: {
+    background: "#3b82f6",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    padding: "10px 20px",
+    cursor: "pointer",
+    fontSize: 14,
+    fontWeight: 600,
+  },
+  btnOutline: {
+    background: "#fff",
+    color: "#111",
+    border: "1px solid #d1d5db",
+    borderRadius: 8,
+    padding: "8px 16px",
+    cursor: "pointer",
+    fontSize: 14,
+  },
+};
