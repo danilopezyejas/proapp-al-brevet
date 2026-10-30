@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CSSProperties } from "react";
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -310,6 +311,7 @@ export default function PreguntadosApp() {
   return (
     <>
       <SpeedInsights />
+      <Analytics />
       <div style={styles.screen}>
         <div style={styles.container}>
         {/* Header */}
