@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CSSProperties } from "react";
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -307,8 +308,10 @@ export default function PreguntadosApp() {
   const currentQuestion = questions[current];
 
   return (
-    <div style={styles.screen}>
-      <div style={styles.container}>
+    <>
+      <SpeedInsights />
+      <div style={styles.screen}>
+        <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
           <div>
@@ -392,7 +395,8 @@ export default function PreguntadosApp() {
           </span>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
